@@ -12,8 +12,9 @@ function generateTaskId() {
     return taskID;
 }
 
-// Todo: create a function to create a task card
+// a function to create a task card
 function createTaskCard(task) {
+    // create task cards using information in the taskList array
     const card = $("<div>")
         .addClass("card task-card my-3")
         .attr("data-task-id", task.id);
@@ -36,6 +37,23 @@ function createTaskCard(task) {
         .attr("data-task-id", task.id);
     cardDeleteBtn.on("click", handleDeleteProject)
 
+    // assign colors to card based on date
+    // validation to check if task doesn't have the status "done"
+    if (task.status !== "done") {
+        const now = day.js();
+        const dueDate = day.js(task.dueDate, "MM-DD-YYYY");
+
+        // if today's date is up to 3 days before the due date, show yellow card
+        // if after due date, show red card
+        if (now.isBetween((dueDate.subtract(3, "day"), dueDate))) {
+            card.addClass("bg-warning text-white");
+        } else if (now.isAfter(dueDate)) {
+            taskCard.addClass('bg-danger text-white');
+            cardDeleteBtn.addClass('border-light');
+        }
+    }
+
+    // append elements to correct parent
     cardBody.append(cardDescription, cardDueDate, cardDeleteBtn);
     card.append(cardHeader, cardBody)
 }
@@ -112,6 +130,12 @@ $(document).ready(function () {
     $(".close").on("click", function () {
         form.modal("hide");
     })
+
+    // add date picker to due date input in modal
+    $('#due-date').datepicker({
+        changeMonth: true,
+        changeYear: true,
+      });
 
     // add user inputs into taskList array
     $("#add-task").on("click", handleAddTask)
