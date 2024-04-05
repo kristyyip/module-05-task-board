@@ -198,7 +198,9 @@ function handleDrop(event, ui) {
 //  when the page loads, render the task list, add event listeners, make lanes droppable, and make the due date field a date picker
 $(document).ready(function () {
     // render task list if there's any saved in local storage
-    renderTaskList();
+    if (taskList) {
+        renderTaskList();
+    }
 
     // open modal when user clicks on the button "Add Task"
     form.on("click", function (event) {
