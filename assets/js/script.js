@@ -43,9 +43,6 @@ function createTaskCard(task) {
         const now = dayjs();
         const dueDate = dayjs(task.dueDate, "MM-DD-YYYY");
 
-        console.log(now);
-        console.log(dueDate);
-
         // if today's date is up to 3 days before the due date, show yellow card
         // if after due date, show red card
         if (now.isBetween(dueDate.subtract(3, "day"), dueDate, "day", "[]")) {
@@ -136,8 +133,25 @@ function handleAddTask(event) {
     }
 }
 
-// Todo: create a function to handle deleting a task
+// a function to handle deleting a task
 function handleDeleteTask(event){
+    // retrieve task id from targeted card button through data attribute
+    const taskID = $(event.target).attr("data-task-id")
+
+    // loop through task list array to find matching task id
+    for (let i=0; i < taskList.length; i++) {
+        if (taskList[i].id === taskID) {
+            // removing a task by id
+            // src: https://sentry.io/answers/remove-specific-item-from-array/
+            taskList.splice(taskList.indexOf(i), 1);
+        }
+    }
+
+    // save updated array into local storage
+    localStorage.setItem("tasks", JSON.stringify(taskList));
+
+    // render task list to remove task
+    renderTaskList();
 
 }
 
