@@ -16,7 +16,7 @@ function generateTaskId() {
 function createTaskCard(task) {
     // create task cards using information in the taskList array
     const card = $("<div>")
-        .addClass("card task-card my-3")
+        .addClass("card task-card my-3 draggable")
         .attr("data-task-id", task.id);
     
     const cardHeader = $("<div>")
@@ -35,20 +35,23 @@ function createTaskCard(task) {
         .addClass("btn btn-danger delete")
         .text("Delete")
         .attr("data-task-id", task.id);
-    cardDeleteBtn.on("click", handleDeleteProject)
+    cardDeleteBtn.on("click", handleDeleteTask)
 
     // assign colors to card based on date
     // validation to check if task doesn't have the status "done"
     if (task.status !== "done") {
-        const now = day.js();
-        const dueDate = day.js(task.dueDate, "MM-DD-YYYY");
+        const now = dayjs();
+        const dueDate = dayjs(task.dueDate, "MM-DD-YYYY");
+
+        console.log(now);
+        console.log(dueDate);
 
         // if today's date is up to 3 days before the due date, show yellow card
         // if after due date, show red card
-        if (now.isBetween((dueDate.subtract(3, "day"), dueDate))) {
+        if (now.isBetween(dueDate.subtract(3, "day"), dueDate, "day", "[]")) {
             card.addClass("bg-warning text-white");
         } else if (now.isAfter(dueDate)) {
-            taskCard.addClass('bg-danger text-white');
+            card.addClass('bg-danger text-white');
             cardDeleteBtn.addClass('border-light');
         }
     }
@@ -56,11 +59,32 @@ function createTaskCard(task) {
     // append elements to correct parent
     cardBody.append(cardDescription, cardDueDate, cardDeleteBtn);
     card.append(cardHeader, cardBody)
+
+    return card;
 }
 
 // Todo: create a function to render the task list and make cards draggable
 function renderTaskList() {
+    // empty existing cards out of the lanes
+    const todoList = $('#todo-cards');
+    todoList.empty();
+  
+    const inProgressList = $('#in-progress-cards');
+    inProgressList.empty();
+  
+    const doneList = $('#done-cards');
+    doneList.empty();
 
+     // loop through tasks and create cards for each status
+    for (let i=0; i < taskList.length; i++) {
+        if (taskList[i].status === "to-do") {
+            todoList.append(createTaskCard(taskList[i]));
+        } else if (taskList[i].status === "in-progress") {
+            todoList.append(createTaskCard(taskList[i]));
+        } else if (taskList[i].status === "done") {
+            todoList.append(createTaskCard(taskList[i]));
+        }
+    }
 }
 
 // a function to handle adding a new task
@@ -106,6 +130,9 @@ function handleAddTask(event) {
         
         // exit out of modal
         form.modal("hide");
+
+        // render task list to include new task
+        renderTaskList();
     }
 }
 
@@ -121,6 +148,9 @@ function handleDrop(event, ui) {
 
 // Todo: when the page loads, render the task list, add event listeners, make lanes droppable, and make the due date field a date picker
 $(document).ready(function () {
+    // render task list if there's any saved in local storage
+    renderTaskList();
+
     // open modal when user clicks on the button "Add Task"
     form.on("click", function (event) {
         form.modal("show");
@@ -129,14 +159,14 @@ $(document).ready(function () {
     // close modal if user clicks on the X
     $(".close").on("click", function () {
         form.modal("hide");
-    })
+    });
 
     // add date picker to due date input in modal
     $('#due-date').datepicker({
         changeMonth: true,
         changeYear: true,
-      });
+    });
 
     // add user inputs into taskList array
-    $("#add-task").on("click", handleAddTask)
+    $("#add-task").on("click", handleAddTask);
 });
